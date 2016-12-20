@@ -1,4 +1,4 @@
-SocketCluster Sample App
+cheatsheet-server
 ======
 
-This is a sample SocketCluster app.
+This repo contains the server for Cheatsheet
