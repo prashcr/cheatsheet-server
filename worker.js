@@ -71,7 +71,7 @@ module.exports.run = async function (worker) {
       }
     });
 
-    socket.on('createNote', async function (request, respond) {
+    socket.on('createNote', async function (__, respond) {
       const token = socket.getAuthToken();
       let note, error;
       if (token) {
@@ -80,7 +80,7 @@ module.exports.run = async function (worker) {
           contents: '',
           updatedAt: Date.now()
         };
-        const id = uuid()
+        const id = uuid();
         try {
           await users.updateOne({username: token.username}, {$set: {['notes.' + id]: note}});
         } catch (e) {
@@ -113,7 +113,7 @@ module.exports.run = async function (worker) {
           if (error) {
             respond(error.message);
           } else {
-            respond(null, null);
+            respond();
           }
         }
       } else {
@@ -121,12 +121,21 @@ module.exports.run = async function (worker) {
       }
     });
 
-    socket.on('getNote', async function (id, respond) {
-      // TODO
-      // const token = user.getAuthToken();
-      //
-      // const user = await users.findOne({username: token.username})
-    })
+    socket.on('getNotes', async function (__, respond) {
+      let user, error;
+      try {
+        const token = socket.getAuthToken();
+        user = await users.findOne({username: token.username});
+      } catch (e) {
+        error = e
+      } finally {
+        if (error) {
+          respond(error)
+        } else {
+          respond(null, user.notes);
+        }
+      }
+    });
 
     socket.on('disconnect', function () {
       // cleanup code in the future
